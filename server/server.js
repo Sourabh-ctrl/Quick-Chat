@@ -40,7 +40,13 @@ app.use("/api/messages", msgRouter);
 
 await connectDB();
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log("sever is listening on " + PORT);
-});
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => {
+    console.log("sever is listening on " + PORT);
+  });
+}
+
+
+export default server;
+// --- IGNORE ---
