@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { createContext } from "react";
 import { AuthContext } from "./AuthContext";
 import { useState } from "react";
@@ -11,6 +11,7 @@ export const ChatProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [unseenMessages, setUnseenMessages] = useState({});
+  const latestRequestUserIdRef = useRef(null);
 
   const { socket, axios } = useContext(AuthContext);
 
@@ -28,9 +29,10 @@ export const ChatProvider = ({ children }) => {
 
   const getMessages = useCallback(
     async (userId) => {
+      latestRequestUserIdRef.current = userId;
       try {
         const { data } = await axios.get(`/api/messages/${userId}`);
-        if (data.success) {
+        if (data.success && latestRequestUserIdRef.current === userId) {
           setMessages(data.messages);
         }
       } catch (error) {
@@ -81,6 +83,18 @@ export const ChatProvider = ({ children }) => {
       socket.off("newMessage", handleNewMessage);
     };
   }, [socket, selectedUser, axios]);
+
+  useEffect(() => {
+    if (!selectedUser) {
+      setMessages([]);
+      latestRequestUserIdRef.current = null;
+      return;
+    }
+
+    // Clear previous chat immediately to avoid stale content while loading.
+    setMessages([]);
+    getMessages(selectedUser._id);
+  }, [selectedUser, getMessages]);
 
   const value = {
     messages,
