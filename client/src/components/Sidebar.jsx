@@ -107,9 +107,12 @@ const Sidebar = () => {
               <p className="font-medium truncate text-sm">
                 {user.fullName}
               </p>
-              <p className={`text-xs truncate mt-0.5 ${onlineUser.includes(user._id) ? "text-emerald-400/90" : "text-slate-500"}`}>
-                {onlineUser.includes(user._id) ? "Online" : "Offline"}
-              </p>
+              {/* Only show "Online" text if the user is online */}
+              {onlineUser.includes(user._id) && (
+                <p className="text-xs truncate mt-0.5 text-emerald-400/90">
+                  Online
+                </p>
+              )}
             </div>
 
             {/* Unread Badge */}
